@@ -65,6 +65,7 @@ SmartGardens-web/
 └── data/
 
     └── plant_settings.json
+    
 
 ## Website Setup
 
