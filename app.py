@@ -338,17 +338,30 @@ def main():
 
         if read_sensor_button:
             with st.spinner(
-                "Loading the latest plant sensor reading..."
+                "Loading the latest reading from Supabase..."
             ):
                 try:
+                    # Clear the 30-second cache so the newest row is requested.
+                    get_latest_sensor_reading.clear()
+
                     latest_reading = get_latest_sensor_reading()
 
                     readings = {
-                        "temperature": latest_reading.get("temperature_c"),
-                        "light": latest_reading.get("light_lux"),
-                        "moisture": latest_reading.get("moisture_percent"),
-                        "fertility": latest_reading.get("fertility_us_cm"),
-                        "battery": latest_reading.get("battery_percent"),
+                        "temperature": latest_reading.get(
+                            "temperature_c"
+                        ),
+                        "light": latest_reading.get(
+                            "light_lux"
+                        ),
+                        "moisture": latest_reading.get(
+                            "moisture_percent"
+                        ),
+                        "fertility": latest_reading.get(
+                            "fertility_us_cm"
+                        ),
+                        "battery": latest_reading.get(
+                            "battery_percent"
+                        ),
                     }
 
                     report = get_green_bean_report(
@@ -356,11 +369,15 @@ def main():
                         readings,
                     )
 
-                    st.session_state.plant_report = report
+                    st.session_state["plant_report"] = report
+
+                    # Rerun so the saved report is displayed immediately.
+                    st.rerun()
 
                 except Exception as error:
                     st.error(
-                        "Could not load the latest plant reading."
+                        "The button worked, but the plant data "
+                        "could not be loaded."
                     )
                     st.exception(error)
 
