@@ -4,7 +4,6 @@ app.py
 Main Streamlit interface for the SmartGardens project.
 """
 
-import asyncio
 import json
 from pathlib import Path
 
@@ -65,26 +64,7 @@ def save_stage(stage):
             file,
             indent=4,
         )
-
-
-def run_async(coroutine):
-    """
-    Run an asynchronous sensor function from Streamlit.
-    """
-
-    try:
-        return asyncio.run(coroutine)
-
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-
-        try:
-            return loop.run_until_complete(coroutine)
-
-        finally:
-            loop.close()
-
-
+        
 def display_stage_selector():
     """
     Ask the user to select the plant's growth stage.
@@ -333,53 +313,48 @@ def main():
     if change_stage_button:
         st.session_state.green_bean_stage = None
         st.session_state.pop("plant_report", None)
-
         st.rerun()
 
-        if read_sensor_button:
-            with st.spinner(
-                "Loading the latest reading from Supabase..."
-            ):
-                try:
-                    # Clear the 30-second cache so the newest row is requested.
-                    get_latest_sensor_reading.clear()
+    if read_sensor_button:
+        with st.spinner(
+            "Loading the latest reading from Supabase..."
+        ):
+            try:
+                get_latest_sensor_reading.clear()
+                latest_reading = get_latest_sensor_reading()
 
-                    latest_reading = get_latest_sensor_reading()
+                readings = {
+                    "temperature": latest_reading.get(
+                        "temperature_c"
+                    ),
+                    "light": latest_reading.get(
+                        "light_lux"
+                    ),
+                    "moisture": latest_reading.get(
+                        "moisture_percent"
+                    ),
+                    "fertility": latest_reading.get(
+                        "fertility_us_cm"
+                    ),
+                    "battery": latest_reading.get(
+                        "battery_percent"
+                    ),
+                }
 
-                    readings = {
-                        "temperature": latest_reading.get(
-                            "temperature_c"
-                        ),
-                        "light": latest_reading.get(
-                            "light_lux"
-                        ),
-                        "moisture": latest_reading.get(
-                            "moisture_percent"
-                        ),
-                        "fertility": latest_reading.get(
-                            "fertility_us_cm"
-                        ),
-                        "battery": latest_reading.get(
-                            "battery_percent"
-                        ),
-                    }
+                report = get_green_bean_report(
+                    stage,
+                    readings,
+                )
 
-                    report = get_green_bean_report(
-                        stage,
-                        readings,
-                    )
+                st.session_state["plant_report"] = report
+                st.rerun()
 
-                    st.session_state["plant_report"] = report
-
-                    # Rerun so the saved report is displayed immediately.
-                    st.rerun()
-
-                except Exception as error:
-                    st.error(
-                        "The button worked, but the plant data "
-                        "could not be loaded."
-                    )
-                    st.exception(error)
+            except Exception as error:
+                st.error(
+                    "The button worked, but the plant data "
+                    "could not be loaded."
+                )
+                st.exception(error)
 
     if "plant_report" in st.session_state:
         display_report(
