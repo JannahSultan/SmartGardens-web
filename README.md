@@ -48,7 +48,7 @@ SmartGardens-web/
 
 │   ├── plant_profiles.py
 
-│   └── plant_status.py
+│   ├──  plant_status.py
 
 │
 
@@ -58,13 +58,13 @@ SmartGardens-web/
 
 │   ├── cloud_sensor.py
 
-│   └── plant_advice.py
+│   ├── plant_advice.py
 
 │
 
 └── data/
 
-    └── plant_settings.json
+│   ├── plant_settings.json
     
 
 ## Website Setup
