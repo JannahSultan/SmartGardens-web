@@ -25,6 +25,7 @@ HHCC Flower Care sensor
 GitHub
 Requests
 ## Project Structure
+```text
 SmartGardens-web/
 │
 ├── app.py
@@ -45,6 +46,7 @@ SmartGardens-web/
 │
 └── data/
     └── plant_settings.json
+text```
 ## Website Setup
 
 Install the required packages:
