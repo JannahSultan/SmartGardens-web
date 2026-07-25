@@ -4,22 +4,9 @@ SmartGardens is a plant-monitoring system that uses an HHCC Flower Care Bluetoot
 
 The Raspberry Pi stays near the plant, reads the sensor through Bluetooth, and uploads the measurements to Supabase. The Streamlit website retrieves the newest reading from Supabase, analyses the plant’s health, and displays care advice.
 
-## System Architecture
-
-```text
-HHCC Flower Care Sensor
-        ↓ Bluetooth
-Raspberry Pi Zero W
-        ↓ Internet
-Supabase Database
-        ↓ Internet
-Streamlit Website
-        ↓
-Phone or Computer
-
 The device viewing the website does not need to be connected to Bluetooth or to the same Wi-Fi network as the Raspberry Pi.
 
-Features
+## Features
 Displays temperature, soil moisture, light, fertility, and battery level
 Supports different green bean growth stages
 Compares current readings with ideal plant conditions
@@ -28,7 +15,7 @@ Displays plant status and mood
 Generates care advice when conditions are too low or too high
 Retrieves readings from Supabase
 Can be accessed from anywhere with an internet connection
-Technologies Used
+## Technologies Used
 Python
 Streamlit
 Supabase
@@ -37,7 +24,7 @@ Bluetooth Low Energy
 HHCC Flower Care sensor
 GitHub
 Requests
-Project Structure
+## Project Structure
 SmartGardens-web/
 │
 ├── app.py
@@ -58,7 +45,7 @@ SmartGardens-web/
 │
 └── data/
     └── plant_settings.json
-Website Setup
+## Website Setup
 
 Install the required packages:
 
@@ -83,7 +70,7 @@ For Streamlit Community Cloud, add them through the app’s Secrets settings.
 
 Do not commit secrets.toml, Supabase secret keys, Raspberry Pi passwords, or Wi-Fi passwords to GitHub.
 
-Raspberry Pi Collector
+## Raspberry Pi Collector
 
 The Raspberry Pi runs a separate collector program that:
 
@@ -94,7 +81,7 @@ Repeats automatically at a set interval.
 
 The collector and Bluetooth-specific files are intentionally not included in this website repository.
 
-Supabase Table
+## Supabase Table
 
 The website expects a Supabase table named:
 
@@ -110,23 +97,23 @@ moisture_percent
 fertility_us_cm
 battery_percent
 error
-Deployment
+## Deployment
 
 The website is deployed using Streamlit Community Cloud.
 
 The Raspberry Pi does not host the website. It acts as a gateway between the Bluetooth sensor and the Supabase database.
 
-Security
+## Security
 
 The website uses a Supabase publishable key.
 
 The Raspberry Pi uses a separate private Supabase secret key for uploading data. That secret key must never be placed in this repository or exposed in the Streamlit website.
 
-Current Plant
+## Current Plant
 
 The current version is configured for a green bean plant and supports different green bean growth stages.
 
-Future Improvements
+## Future Improvements
 
 Possible future additions include:
 
@@ -138,4 +125,17 @@ User accounts
 Improved mobile layout
 Automatic growth-stage recommendations
 
-Do not include your actual passwords, Wi-Fi information, sensor credentials, or `sb_secret_` key in the README.
+## System Architecture
+
+```text
+HHCC Flower Care Sensor
+        ↓ Bluetooth
+Raspberry Pi Zero W
+        ↓ Internet
+Supabase Database
+        ↓ Internet
+Streamlit Website
+        ↓
+Phone or Computer
+
+
