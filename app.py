@@ -292,6 +292,19 @@ def main():
     if stage is None:
         display_stage_selector()
         st.stop()
+        
+    with st.container(border=True):
+        if st.button("Go to The Sprout Lab 🔬"):
+            st.switch_page("pages/SproutLab.py")
+
+        st.write("The place to go to answer questions, solve plant mysteries, and learn!")
+
+    with st.container(border=True):
+        if st.button("Go to the Teacher Dashboard 🍎"):
+            st.switch_page("pages/TeacherPage.py")
+
+        st.write("Use this page to access student data, progress, and group information!")
+
 
     st.caption(
         f"Saved growth stage: **{stage.title()}**"
