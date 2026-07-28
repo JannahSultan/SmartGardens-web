@@ -295,7 +295,7 @@ def main():
         
     with st.container(border=True):
         if st.button("Go to The Sprout Lab 🔬"):
-            st.switch_page("pages/SproutLab.py")
+            st.switch_page("SproutLab.py")
 
         st.write("The place to go to answer questions, solve plant mysteries, and learn!")
 
