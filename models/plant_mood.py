@@ -11,15 +11,15 @@ def get_plant_mood(score):
     """
 
     if score >= 90:
-        return "Thriving 😊"
+        return "Thriving"
 
     if score >= 70:
-        return "Happy 🙂"
+        return "Happy"
 
     if score >= 50:
-        return "Concerned 😐"
+        return "Concerned"
 
     if score >= 25:
-        return "Struggling 😟"
+        return "Struggling"
 
-    return "Very Unhappy 😢"
+    return "Very Unhappy"
