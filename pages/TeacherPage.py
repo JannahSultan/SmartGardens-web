@@ -48,9 +48,51 @@ if st.session_state.teacher_logged_in:
 
     st.subheader("My Groups")
 
-    st.info(
-        "Your student groups will appear here once we add the group system."
-    )
+        st.subheader("Add Student Group")
+
+    with st.form("add_group_form"):
+        group_name = st.text_input("Group Name")
+        student_username = st.text_input("Student Username")
+        student_password = st.text_input("Student Password", type="password")
+        sensor_supabase_url = st.text_input("Sensor Supabase URL")
+        sensor_publishable_key = st.text_input("Sensor Publishable Key")
+        device_id = st.text_input("Device ID")
+
+        submitted = st.form_submit_button("Create Group")
+
+        if submitted:
+            if not all([
+                group_name,
+                student_username,
+                student_password,
+                sensor_supabase_url,
+                sensor_publishable_key,
+                device_id
+            ]):
+                st.error("Please fill in every field.")
+
+            else:
+                try:
+                    password_hash = bcrypt.hashpw(
+                        student_password.encode("utf-8"),
+                        bcrypt.gensalt()
+                    ).decode("utf-8")
+
+                    central_supabase.table("student_groups").insert({
+                        "teacher_id": st.session_state.teacher_id,
+                        "group_name": group_name,
+                        "student_username": student_username,
+                        "student_password_hash": password_hash,
+                        "supabase_url": sensor_supabase_url,
+                        "supabase_publishable_key": sensor_publishable_key,
+                        "device_id": device_id
+                    }).execute()
+
+                    st.success("Student group created successfully.")
+                    st.rerun()
+
+                except Exception as error:
+                    st.error(f"Could not create group: {error}")
 
     if st.button("Log Out"):
 
