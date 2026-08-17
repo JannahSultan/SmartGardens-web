@@ -4,42 +4,14 @@ import requests
 import streamlit as st
 
 
-def get_secret(name: str, default: str | None = None) -> str:
-    try:
-        value = st.secrets.get(name, default)
-    except Exception:
-        value = default
-
-    if not value:
-        raise RuntimeError(f"Missing Streamlit secret: {name}")
-
-    return str(value)
-
-
 @st.cache_data(ttl=30, show_spinner=False)
-def get_latest_sensor_reading() -> dict[str, Any]:
-    supabase_url = get_secret("SUPABASE_URL").rstrip("/")
+def get_latest_sensor_reading(
+    supabase_url: str,
+    api_key: str,
+    device_id: str
+) -> dict[str, Any]:
 
-    try:
-        api_key = st.secrets.get("SUPABASE_PUBLISHABLE_KEY")
-    except Exception:
-        api_key = None
-
-    if not api_key:
-        try:
-            api_key = st.secrets.get("SUPABASE_ANON_KEY")
-        except Exception:
-            api_key = None
-
-    if not api_key:
-        raise RuntimeError(
-            "Missing SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY"
-        )
-
-    try:
-        device_id = st.secrets.get("DEVICE_ID", "green-bean-1")
-    except Exception:
-        device_id = "green-bean-1"
+    supabase_url = supabase_url.rstrip("/")
 
     headers = {
         "apikey": str(api_key),
@@ -70,7 +42,32 @@ def get_latest_sensor_reading() -> dict[str, Any]:
 
     if not rows:
         raise RuntimeError(
-            "No readings for green-bean-1 have been uploaded yet."
+            f"No readings for {device_id} have been uploaded yet."
         )
 
     return rows[0]
+
+
+def get_logged_in_student_reading() -> dict[str, Any]:
+
+    if not st.session_state.get("student_logged_in"):
+        raise RuntimeError("Student is not signed in.")
+
+    supabase_url = st.session_state.get("sensor_supabase_url")
+    api_key = st.session_state.get("sensor_publishable_key")
+    device_id = st.session_state.get("device_id")
+
+    if not supabase_url:
+        raise RuntimeError("Missing sensor Supabase URL.")
+
+    if not api_key:
+        raise RuntimeError("Missing sensor publishable key.")
+
+    if not device_id:
+        raise RuntimeError("Missing sensor device ID.")
+
+    return get_latest_sensor_reading(
+        supabase_url,
+        api_key,
+        device_id
+    )
