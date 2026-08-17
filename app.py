@@ -276,6 +276,18 @@ def main():
         layout="wide",
     )
 
+    if not st.session_state.get("student_logged_in"):
+        st.title("🌱 SmartGardens")
+
+        st.warning(
+            "Please sign in with your group's username and password."
+        )
+
+        if st.button("Go to Student Sign In"):
+            st.switch_page("pages/StudentPage.py")
+
+        st.stop()
+
     st.title("🌱 PlantPal")
 
     st.write(
