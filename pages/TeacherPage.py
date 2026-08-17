@@ -1,106 +1,246 @@
 import streamlit as st
-
-st.title("Teacher Dashboard 🍎")
-st.write("Click below to view information about the student data and group progress.")
-
-if st.button("Go back to the main SmartGardens page 🌱"):
-    st.switch_page("app.py")
+from supabase import create_client
 
 
-# Function to create group cards
-def group_card(title, color, members, plant, questions, mysteries, challenges):
+# --------------------------------------------------
+# CENTRAL SUPABASE CONNECTION
+# --------------------------------------------------
 
-    st.markdown(
-        f"""
-        <div style="
-            background-color: {color};
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid #000000;
-            margin-bottom: 15px;
-        ">
-            <h3>{title}</h3>
-            <p><b>Group Members:</b> {members}</p>
-            <p><b>Assigned Plant:</b> {plant}</p>
-            <p><b>Question Bank:</b> {questions}</p>
-            <p><b>Plant Mystery:</b> {mysteries}</p>
-            <p><b>Climate Challenge:</b> {challenges}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
+central_supabase = create_client(
+    st.secrets["CENTRAL_SUPABASE_URL"],
+    st.secrets["CENTRAL_SUPABASE_PUBLISHABLE_KEY"]
+)
+
+
+# --------------------------------------------------
+# SESSION STATE
+# --------------------------------------------------
+
+if "teacher_logged_in" not in st.session_state:
+    st.session_state.teacher_logged_in = False
+
+if "teacher_id" not in st.session_state:
+    st.session_state.teacher_id = None
+
+if "teacher_email" not in st.session_state:
+    st.session_state.teacher_email = None
+
+if "teacher_access_token" not in st.session_state:
+    st.session_state.teacher_access_token = None
+
+if "teacher_refresh_token" not in st.session_state:
+    st.session_state.teacher_refresh_token = None
+
+
+# --------------------------------------------------
+# LOGGED-IN TEACHER DASHBOARD
+# --------------------------------------------------
+
+if st.session_state.teacher_logged_in:
+
+    st.title("Teacher Dashboard 🍎")
+
+    st.write(
+        f"Signed in as **{st.session_state.teacher_email}**"
+    )
+
+    st.success("Teacher login successful.")
+
+    st.subheader("My Groups")
+
+    st.info(
+        "Your student groups will appear here once we add the group system."
+    )
+
+    if st.button("Log Out"):
+
+        central_supabase.auth.sign_out()
+
+        st.session_state.teacher_logged_in = False
+        st.session_state.teacher_id = None
+        st.session_state.teacher_email = None
+        st.session_state.teacher_access_token = None
+        st.session_state.teacher_refresh_token = None
+
+        st.rerun()
+
+
+# --------------------------------------------------
+# TEACHER LOGIN / SIGN UP
+# --------------------------------------------------
+
+else:
+
+    st.title("SmartGardens Teacher Portal 🍎")
+
+    st.write(
+        "Sign in or create a teacher account to manage your student groups."
+    )
+
+    sign_in_tab, create_account_tab = st.tabs(
+        ["Sign In", "Create Account"]
     )
 
 
-# -------------------------
-# Group 1
-# -------------------------
+    # --------------------------------------------------
+    # SIGN IN
+    # --------------------------------------------------
 
-group_card(
-    "🌱 Group #1",
-    "#E8F5E9",
-    "Emma Rodriguez, Liam Chen, Olivia Patel, Noah Williams, Sophia Nguyen",
-    "Green Bean Plant #1",
-    "52/300 Questions Answered",
-    "1/6 Mysteries Solved",
-    "4/10 Challenges Done"
-)
+    with sign_in_tab:
+
+        st.subheader("Teacher Sign In")
+
+        sign_in_email = st.text_input(
+            "Email",
+            key="teacher_sign_in_email"
+        )
+
+        sign_in_password = st.text_input(
+            "Password",
+            type="password",
+            key="teacher_sign_in_password"
+        )
+
+        if st.button(
+            "Sign In",
+            key="teacher_sign_in_button"
+        ):
+
+            if not sign_in_email or not sign_in_password:
+
+                st.error(
+                    "Please enter both your email and password."
+                )
+
+            else:
+
+                try:
+
+                    response = central_supabase.auth.sign_in_with_password(
+                        {
+                            "email": sign_in_email,
+                            "password": sign_in_password
+                        }
+                    )
+
+                    if response.user and response.session:
+
+                        st.session_state.teacher_logged_in = True
+
+                        st.session_state.teacher_id = (
+                            response.user.id
+                        )
+
+                        st.session_state.teacher_email = (
+                            response.user.email
+                        )
+
+                        st.session_state.teacher_access_token = (
+                            response.session.access_token
+                        )
+
+                        st.session_state.teacher_refresh_token = (
+                            response.session.refresh_token
+                        )
+
+                        st.rerun()
+
+                    else:
+
+                        st.error(
+                            "Unable to sign in."
+                        )
+
+                except Exception as error:
+
+                    st.error(
+                        f"Sign in failed: {error}"
+                    )
 
 
-# -------------------------
-# Group 2
-# -------------------------
+    # --------------------------------------------------
+    # CREATE ACCOUNT
+    # --------------------------------------------------
 
-group_card(
-    "🌱 Group #2",
-    "#FFF9C4",
-    "Ethan Johnson, Ava Martinez, Lucas Kim, Mia Thompson, Jackson Lee",
-    "Tomato Plant #1",
-    "295/300 Questions Answered",
-    "2/6 Mysteries Solved",
-    "1/10 Challenges Done"
-)
+    with create_account_tab:
+
+        st.subheader("Create Teacher Account")
+
+        new_email = st.text_input(
+            "Email",
+            key="teacher_create_email"
+        )
+
+        new_password = st.text_input(
+            "Password",
+            type="password",
+            key="teacher_create_password"
+        )
+
+        confirm_password = st.text_input(
+            "Confirm Password",
+            type="password",
+            key="teacher_confirm_password"
+        )
+
+        if st.button(
+            "Create Account",
+            key="teacher_create_account_button"
+        ):
+
+            if not new_email or not new_password:
+
+                st.error(
+                    "Please enter an email and password."
+                )
+
+            elif new_password != confirm_password:
+
+                st.error(
+                    "Passwords do not match."
+                )
+
+            else:
+
+                try:
+
+                    response = central_supabase.auth.sign_up(
+                        {
+                            "email": new_email,
+                            "password": new_password
+                        }
+                    )
+
+                    if response.user:
+
+                        st.success(
+                            "Teacher account created successfully."
+                        )
+
+                        st.info(
+                            "If email confirmation is enabled in Supabase, check your email before signing in."
+                        )
+
+                    else:
+
+                        st.error(
+                            "Unable to create account."
+                        )
+
+                except Exception as error:
+
+                    st.error(
+                        f"Account creation failed: {error}"
+                    )
 
 
-# -------------------------
-# Group 3
-# -------------------------
+# --------------------------------------------------
+# BACK TO MAIN SITE
+# --------------------------------------------------
 
-group_card(
-    "🌱 Group #3",
-    "#FFCDD2",
-    "Isabella Garcia, Aiden Smith, Chloe Brown, Mason Wilson",
-    "Green Bean Plant #2",
-    "14/300 Questions Answered",
-    "1/6 Mysteries Solved",
-    "0/10 Challenges Done"
-)
+st.divider()
 
-
-# -------------------------
-# Group 4
-# -------------------------
-
-group_card(
-    "🌱 Group #4",
-    "#FFF9C4",
-    "Lily Anderson, Benjamin Davis, Zoe Taylor, Henry Clark",
-    "Radish Plant #1",
-    "288/300 Questions Answered",
-    "1/6 Mysteries Solved",
-    "2/10 Challenges Done"
-)
-
-
-# -------------------------
-# Group 5
-# -------------------------
-
-group_card(
-    "🌱 Group #5",
-    "#C8E6C9",
-    "Grace Thomas, Daniel White, Hannah Moore, Caleb Martin, Aria Scott, Jack Miller",
-    "Tomato Plant #2",
-    "134/300 Questions Answered",
-    "5/6 Mysteries Solved",
-    "10/10 Challenges Done"
-)
+if st.button(
+    "Go back to the main SmartGardens page 🌱"
+):
+    st.switch_page("app.py")
