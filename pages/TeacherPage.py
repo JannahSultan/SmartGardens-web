@@ -1,6 +1,6 @@
 import streamlit as st
+import bcrypt
 from supabase import create_client
-
 
 # --------------------------------------------------
 # CENTRAL SUPABASE CONNECTION
@@ -10,7 +10,6 @@ central_supabase = create_client(
     st.secrets["CENTRAL_SUPABASE_URL"],
     st.secrets["CENTRAL_SUPABASE_PUBLISHABLE_KEY"]
 )
-
 
 # --------------------------------------------------
 # SESSION STATE
@@ -31,7 +30,6 @@ if "teacher_access_token" not in st.session_state:
 if "teacher_refresh_token" not in st.session_state:
     st.session_state.teacher_refresh_token = None
 
-
 # --------------------------------------------------
 # LOGGED-IN TEACHER DASHBOARD
 # --------------------------------------------------
@@ -46,16 +44,25 @@ if st.session_state.teacher_logged_in:
 
     st.success("Teacher login successful.")
 
-    st.subheader("My Groups")
+    # --------------------------------------------------
+    # ADD STUDENT GROUP
+    # --------------------------------------------------
 
-        st.subheader("Add Student Group")
+    st.subheader("Add Student Group")
 
     with st.form("add_group_form"):
         group_name = st.text_input("Group Name")
         student_username = st.text_input("Student Username")
-        student_password = st.text_input("Student Password", type="password")
-        sensor_supabase_url = st.text_input("Sensor Supabase URL")
-        sensor_publishable_key = st.text_input("Sensor Publishable Key")
+        student_password = st.text_input(
+            "Student Password",
+            type="password"
+        )
+        sensor_supabase_url = st.text_input(
+            "Sensor Supabase URL"
+        )
+        sensor_publishable_key = st.text_input(
+            "Sensor Publishable Key"
+        )
         device_id = st.text_input("Device ID")
 
         submitted = st.form_submit_button("Create Group")
@@ -88,11 +95,63 @@ if st.session_state.teacher_logged_in:
                         "device_id": device_id
                     }).execute()
 
-                    st.success("Student group created successfully.")
+                    st.success(
+                        "Student group created successfully."
+                    )
+
                     st.rerun()
 
                 except Exception as error:
-                    st.error(f"Could not create group: {error}")
+                    st.error(
+                        f"Could not create group: {error}"
+                    )
+
+
+    # --------------------------------------------------
+    # DISPLAY TEACHER'S GROUPS
+    # --------------------------------------------------
+
+    st.subheader("My Groups")
+
+    try:
+        groups = (
+            central_supabase
+            .table("student_groups")
+            .select("*")
+            .eq(
+                "teacher_id",
+                st.session_state.teacher_id
+            )
+            .execute()
+        )
+
+        if groups.data:
+            for group in groups.data:
+                st.write(
+                    f"**{group['group_name']}**"
+                )
+                st.write(
+                    f"Username: `{group['student_username']}`"
+                )
+                st.write(
+                    f"Device ID: `{group['device_id']}`"
+                )
+                st.divider()
+
+        else:
+            st.info(
+                "You have not created any student groups yet."
+            )
+
+    except Exception as error:
+        st.error(
+            f"Could not load groups: {error}"
+        )
+
+
+    # --------------------------------------------------
+    # LOG OUT
+    # --------------------------------------------------
 
     if st.button("Log Out"):
 
@@ -105,8 +164,6 @@ if st.session_state.teacher_logged_in:
         st.session_state.teacher_refresh_token = None
 
         st.rerun()
-
-
 # --------------------------------------------------
 # TEACHER LOGIN / SIGN UP
 # --------------------------------------------------
