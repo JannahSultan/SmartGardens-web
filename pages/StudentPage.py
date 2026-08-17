@@ -58,6 +58,8 @@ if not st.session_state.student_logged_in:
 
                         st.session_state.student_group_id = group["id"]
                         st.session_state.student_group_name = group["group_name"]
+                        st.session_state.student_group_plant_type = group.get("plant_type")
+                        st.session_state.student_group_plant_stage = group.get("plant_stage")
 
                         st.session_state.sensor_supabase_url = (
                             group["supabase_url"]
