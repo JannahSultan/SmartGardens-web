@@ -11,8 +11,7 @@ import streamlit as st
 
 from main import get_green_bean_report
 from models.plant_profiles import GREEN_BEAN_STAGES
-from services.cloud_sensor import get_latest_sensor_reading
-
+from services.cloud_sensor import get_logged_in_student_reading
 
 PROJECT_FOLDER = Path(__file__).resolve().parent
 DATA_FOLDER = PROJECT_FOLDER / "data"
@@ -333,8 +332,7 @@ def main():
             "Loading the latest reading from Supabase..."
         ):
             try:
-                get_latest_sensor_reading.clear()
-                latest_reading = get_latest_sensor_reading()
+                latest_reading = get_logged_in_student_reading()
 
                 readings = {
                     "temperature": latest_reading.get(
