@@ -1,12 +1,12 @@
 """
 plant_profiles.py
 
-Stores the ideal conditions for each green bean stage.
+Stores the ideal conditions for each plant stage.
 """
 
-
-GREEN_BEAN_STAGES = {
-    "sprout": {
+PLANT_PROFILES = {
+    "green_bean": {
+        "sprout": {
         "temperature": (21, 27),
         "light": (1500, 20000),
         "moisture": (60, 80),
@@ -41,9 +41,9 @@ GREEN_BEAN_STAGES = {
         "light": (18000, 35000),
         "moisture": (40, 60),
         "fertility": (500, 800),
-    },
+    }
+        }
 }
-
 
 def get_green_bean_ideals(stage):
     """
@@ -52,9 +52,9 @@ def get_green_bean_ideals(stage):
 
     stage = stage.strip().lower()
 
-    if stage not in GREEN_BEAN_STAGES:
+    if stage not in PLANT_PROFILES:
         valid_stages = ", ".join(
-            GREEN_BEAN_STAGES.keys()
+            PLANT_PROFILES.keys()
         )
 
         raise ValueError(
@@ -62,4 +62,4 @@ def get_green_bean_ideals(stage):
             f"Choose from: {valid_stages}"
         )
 
-    return GREEN_BEAN_STAGES[stage]
+    return PLANT_PROFILES[stage]
