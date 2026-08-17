@@ -2,15 +2,19 @@ import streamlit as st
 import bcrypt
 from supabase import create_client
 
-# --------------------------------------------------
-# CENTRAL SUPABASE CONNECTION
-# --------------------------------------------------
-
 central_supabase = create_client(
     st.secrets["CENTRAL_SUPABASE_URL"],
     st.secrets["CENTRAL_SUPABASE_PUBLISHABLE_KEY"]
 )
 
+if (
+    st.session_state.get("teacher_access_token")
+    and st.session_state.get("teacher_refresh_token")
+):
+    central_supabase.auth.set_session(
+        st.session_state.teacher_access_token,
+        st.session_state.teacher_refresh_token
+    )
 # --------------------------------------------------
 # SESSION STATE
 # --------------------------------------------------
