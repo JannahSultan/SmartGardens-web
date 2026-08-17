@@ -217,10 +217,6 @@ else:
                             "Teacher account created successfully."
                         )
 
-                        st.info(
-                            "If email confirmation is enabled in Supabase, check your email before signing in."
-                        )
-
                     else:
 
                         st.error(
